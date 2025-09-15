@@ -84,7 +84,8 @@ jobs:
           cargo update
           git add Cargo.toml
           git add Cargo.lock
-          git commit -m "Bump version to ${{ github.event.inputs.version }}" || true          
+          git commit -m "Bump version to ${{ github.event.inputs.version }}" || true
+          git push origin ${{ github.event.inputs.commitish }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
