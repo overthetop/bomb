@@ -87,11 +87,11 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
-      - name: Debug artifacts
+      - name: Rename artifacts for unique names
         run: |
-          echo "Downloaded artifacts:"
-          find . -name "bomb*" -type f
-          ls -la bomb-*/
+          mv bomb-ubuntu-latest/bomb bomb_linux
+          mv bomb-windows-latest/bomb.exe bomb_windows.exe
+          mv bomb-macos-latest/bomb bomb_macos
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -101,9 +101,9 @@ jobs:
           name: Release v${{ github.event.inputs.version }}
           body: ${{ github.event.inputs.body || 'No description provided.' }}
           files: |
-            bomb-ubuntu-latest/bomb
-            bomb-windows-latest/bomb.exe
-            bomb-macos-latest/bomb
+            bomb_linux
+            bomb_windows.exe
+            bomb_macos
           overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
