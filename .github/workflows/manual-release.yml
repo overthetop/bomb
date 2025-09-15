@@ -87,6 +87,12 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
+      - name: Debug artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find . -name "bomb*" -type f
+          ls -la bomb-*/
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
