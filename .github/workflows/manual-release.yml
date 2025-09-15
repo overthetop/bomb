@@ -104,14 +104,17 @@ jobs:
             bomb_linux
             bomb_windows.exe
             bomb_macos
-          overwrite: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up artifact files
+        run: rm -f bomb_linux bomb_windows.exe bomb_macos
 
       - name: Setup Rust for publishing
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
 
       - name: Publish to crates.io
         env:
