@@ -40,7 +40,11 @@ jobs:
 
       - name: Update Cargo.toml version
         run: |
-          sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          else
+            sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          fi
         shell: bash
 
       - name: Build and test
