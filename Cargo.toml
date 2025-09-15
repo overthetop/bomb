@@ -1,0 +1,35 @@
+[package]
+name = "bomb"
+version = "0.1.0"
+edition = "2024"
+description = "High-performance HTTP and WebSocket stress testing tool"
+authors = ["overthetop"]
+license = "MIT"
+repository = "https://github.com/overthetop/bomb"
+homepage = "https://github.com/overthetop/bomb"
+documentation = "https://docs.rs/bomb"
+readme = "README.md"
+keywords = ["stress-testing", "websocket", "http", "performance", "load-testing"]
+categories = ["command-line-utilities", "network-programming", "development-tools::testing"]
+exclude = ["*.local.md"]
+
+[dependencies]
+tokio = { version = "1.42", features = ["full"] }
+tokio-tungstenite = { version = "0.27", features = ["rustls-tls-webpki-roots"] }
+rustls = { version = "0.23", default-features = false, features = ["ring"] }
+url = "2.5"
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.18", features = ["v4"] }
+futures-util = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "2.0"
+http = "1.3"
+regex = "1.11"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.9"
+once_cell = "1.21"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+async-trait = "0.1"

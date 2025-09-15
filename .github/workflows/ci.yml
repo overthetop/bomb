@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable]
+
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+
+    - name: Install stable toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ matrix.rust }}
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+    - name: Run clippy
+      run: cargo clippy --all-features --all-targets -- -D warnings
+
+    - name: Run tests
+      run: cargo test --verbose --all-features
+
+    - name: Build release
+      run: cargo build --release --verbose
+
+    - name: Upload executable (Unix)
+      if: matrix.os != 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: bomb-${{ matrix.os }}
+        path: target/release/bomb
+        retention-days: 7
+
+    - name: Upload executable (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: bomb-${{ matrix.os }}
+        path: target/release/bomb.exe
+        retention-days: 7
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+
+    - name: Install stable toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ubuntu-latest-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Build release for integration tests
+      run: cargo build --release
+
+    - name: Run integration tests
+      run: cargo test --test integration_tests -- --nocapture
+
+    - name: Test WebSocket connectivity
+      run: timeout 30s ./target/release/bomb -t wss://echo.websocket.org -c 1 -n 3 || true
+
+    - name: Test HTTP connectivity
+      run: timeout 30s ./target/release/bomb -t https://httpbin.org/status/200 -m http -c 1 -n 3 || true
