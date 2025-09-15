@@ -1,6 +1,6 @@
 # 💣 Bomb - HTTP & WebSocket Stress Testing Tool
 
-[![Rust](https://github.com/username/bomb/workflows/CI/badge.svg)](https://github.com/username/bomb/actions)
+[![Rust](https://github.com/overthetop/bomb/workflows/CI/badge.svg)](https://github.com/overthetop/bomb/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Crates.io](https://img.shields.io/crates/v/bomb.svg)](https://crates.io/crates/bomb)
 [![Documentation](https://docs.rs/bomb/badge.svg)](https://docs.rs/bomb)
@@ -19,7 +19,6 @@ connections to send JSON messages and verify responses.
 - [Sample Output](#-sample-output)
 - [Testing Your Server](#-testing-your-websocket-server)
 - [Configuration Tips](#-configuration-tips)
-- [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 
 ## ✨ Features
@@ -75,7 +74,7 @@ cargo install bomb
 ### Option 2: Build from Source
 
 ```bash
-git clone https://github.com/username/bomb.git
+git clone https://github.com/overthetop/bomb.git
 cd bomb
 cargo build --release
 ```
@@ -84,7 +83,7 @@ The binary will be available at `target/release/bomb`.
 
 ### Prerequisites
 
-- Rust 1.70+ (2024 edition)
+- Rust 1.80+ (2024 edition)
 - Cargo package manager
 
 ## 🛠️ Usage
@@ -159,21 +158,25 @@ USAGE:
 bomb [OPTIONS] --target <URL>
 
 OPTIONS:
--t, --target <URL>            Target server URL (supports random generation) [required]
--m, --mode <MODE>             Connection mode: ws (WebSocket) or http [default: ws]
--c, --clients <N>             Number of concurrent clients [default: 10]
--d, --duration <SECONDS>      Duration of test in seconds (mutually exclusive with -n)
--n, --total-messages <COUNT>  Total number of messages/requests to send across all clients
--r, --message-rate <PER_SEC>  Messages per second per client [default: 100] (0 = unlimited)
--T, --timeout <SECONDS>       Timeout to wait for response [default: 30]
--p, --payload <JSON>          JSON payload to send (supports random generation)
--H, --header <KEY:VALUE>      Add custom HTTP header (can be used multiple times)
---http-method <METHOD>        HTTP method for requests [default: get]
---ws-mode <MODE>              WebSocket mode: echo or broadcast [default: echo]
--k, --insecure Allow insecure connections (self-signed certificates)
+-t, --target <URL>            Target URL to stress test (supports HTTP/HTTPS/WS/WSS protocols) [required]
+-c, --clients <COUNT>         Number of concurrent clients to spawn [default: 10]
+-d, --duration <SECONDS>      Duration of the test (e.g., '30s', '5m', '2h')
+-n, --total-messages <COUNT>  Total number of messages to send across all clients
+-r, --message-rate <RATE>     Messages per second per client (0 = unlimited) [default: 100]
+--timeout <SECONDS>       Connection timeout in seconds [default: 30]
+--max-pending <COUNT>     Maximum pending messages per client (memory protection) [default: 6000]
+-H, --header <HEADER>         Custom headers in 'Key: Value' format (can be used multiple times)
+--insecure Allow insecure TLS connections (skip certificate verification)
 -v, --verbose Enable verbose logging
--h, --help Print help information
--V, --version Print version information
+-p, --payload <JSON>          JSON payload to send (WebSocket mode requires 'id' field, HTTP mode does not)
+-m, --mode <MODE>             Connection protocol mode [default: ws]
+Possible values: http, ws
+--ws-mode <WS_MODE>       WebSocket behavior mode (only used in WebSocket mode) [default: echo]
+Possible values: echo, broadcast
+--http-method <METHOD>    HTTP method for stress testing (only used in HTTP mode) [default: get]
+Possible values: get, post, put, delete, patch
+-h, --help Print help (see a summary with '-h')
+-V, --version Print version
 
 ```
 
