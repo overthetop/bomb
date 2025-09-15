@@ -1,0 +1,63 @@
+name: Manual Release (Maintainer Only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      commitish:
+        description: 'Target commit or branch (default: main)'
+        required: false
+        default: 'main'
+        type: string
+      body:
+        description: 'Release notes'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commitish }}
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Update Cargo.toml version
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add Cargo.toml
+          git commit -m "Bump version to ${{ github.event.inputs.version }}" || true
+
+      - name: Build and test
+        run: |
+          cargo build --release
+          cargo test --all-features
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          target_commitish: ${{ github.event.inputs.commitish }}
+          name: Release v${{ github.event.inputs.version }}
+          body: ${{ github.event.inputs.body || 'No description provided.' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
