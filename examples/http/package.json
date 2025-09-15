@@ -1,0 +1,13 @@
+{
+  "name": "bomb-http-test-server",
+  "version": "1.0.0",
+  "description": "Simple HTTP test server for Bomb stress testing tool",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["http", "server", "test", "bomb"],
+  "author": "",
+  "license": "MIT"
+}

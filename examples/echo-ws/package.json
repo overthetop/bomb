@@ -1,0 +1,16 @@
+{
+  "name": "bomb-echo-server",
+  "version": "1.0.0",
+  "description": "WebSocket echo server for testing bomb tool",
+  "main": "echo.js",
+  "scripts": {
+    "start": "node echo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "keywords": ["websocket", "echo", "testing"],
+  "author": "",
+  "license": "ISC"
+}

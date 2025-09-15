@@ -1,0 +1,16 @@
+{
+  "name": "bomb-ws-broadcast-server",
+  "version": "1.0.0",
+  "description": "WebSocket broadcast server for testing bomb tool",
+  "main": "broadcast.js",
+  "scripts": {
+    "start": "node broadcast.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "keywords": ["websocket", "broadcast", "testing"],
+  "author": "",
+  "license": "ISC"
+}

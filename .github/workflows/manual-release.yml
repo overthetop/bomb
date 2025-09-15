@@ -1,0 +1,125 @@
+name: Manual Release (Maintainer Only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      commitish:
+        description: 'Target commit or branch (default: main)'
+        required: false
+        default: 'main'
+        type: string
+      body:
+        description: 'Release notes'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        rust: [ stable ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commitish }}
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - name: Update Cargo.toml version
+        run: |
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            sed -i '' 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          else
+            sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          fi
+        shell: bash
+
+      - name: Build and test
+        run: |
+          cargo build --release
+          cargo test --all-features
+
+      - name: Upload executable (Unix)
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bomb-${{ matrix.os }}
+          path: target/release/bomb
+
+      - name: Upload executable (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bomb-${{ matrix.os }}
+          path: target/release/bomb.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commitish }}
+
+      - name: Update Cargo.toml version
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          cargo update
+          git add Cargo.toml
+          git add Cargo.lock
+          git commit -m "Bump version to ${{ github.event.inputs.version }}" || true
+          git push origin ${{ github.event.inputs.commitish }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Rename artifacts for unique names
+        run: |
+          mv bomb-ubuntu-latest/bomb bomb_linux
+          mv bomb-windows-latest/bomb.exe bomb_windows.exe
+          mv bomb-macos-latest/bomb bomb_macos
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          target_commitish: ${{ github.event.inputs.commitish }}
+          name: Release v${{ github.event.inputs.version }}
+          body: ${{ github.event.inputs.body || 'No description provided.' }}
+          files: |
+            bomb_linux
+            bomb_windows.exe
+            bomb_macos
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up artifact files
+        run: rm -f bomb_linux bomb_windows.exe bomb_macos
+
+      - name: Setup Rust for publishing
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish
