@@ -34,9 +34,7 @@ jobs:
           ref: ${{ github.event.inputs.commitish }}
 
       - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Update Cargo.toml version
         run: |
@@ -101,9 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Rust for publishing
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Publish to crates.io
         env:
