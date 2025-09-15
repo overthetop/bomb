@@ -25,7 +25,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        rust: [ stable ]
 
     steps:
       - name: Checkout code
@@ -35,6 +36,8 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
 
       - name: Update Cargo.toml version
         run: |
@@ -100,6 +103,8 @@ jobs:
 
       - name: Setup Rust for publishing
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
 
       - name: Publish to crates.io
         env:
