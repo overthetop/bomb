@@ -98,6 +98,7 @@ jobs:
             bomb-ubuntu-latest/bomb
             bomb-windows-latest/bomb.exe
             bomb-macos-latest/bomb
+          overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
