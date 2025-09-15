@@ -40,7 +40,7 @@ jobs:
 
       - name: Update Cargo.toml version
         run: |
-          if [[ "$OSTYPE" == "darwin"* ]]; then
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             sed -i '' 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
           else
             sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
