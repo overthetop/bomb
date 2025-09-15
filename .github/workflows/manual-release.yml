@@ -81,8 +81,10 @@ jobs:
           sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' Cargo.toml
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          cargo update
           git add Cargo.toml
-          git commit -m "Bump version to ${{ github.event.inputs.version }}" || true
+          git add Cargo.lock
+          git commit -m "Bump version to ${{ github.event.inputs.version }}" || true          
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
